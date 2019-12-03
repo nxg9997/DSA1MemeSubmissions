@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>DSA 1 Fall 2019 Meme Submissions</title>
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="mdl-grid" id="app">
+        <div class="mdl-grid mdl-cell mdl-cell--12-col mdl-cell--middle">
+            <div class="mdl-cell mdl-cell--12-col mdl-cell--middle">
+                <h1 class="center-text">DSA 1 Fall 2019 Meme Submissions</h1>
+            </div>
+            <div class="mdl-cell mdl-cell--12-col mdl-cell--middle">
+                <p class="center-text">Here lies all the dank memes that were submitted as assignments during this semester. May the lemons be with you.</p>
+            </div>
+        </div>
+        <div class="mdl-grid mdl-cell mdl-cell--12-col">
+            <div class="mdl-cell mdl-cell--3-col" v-for="meme in memes">
+                <img :src="meme.src"/>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    //create the vue instance
+    var app = new Vue({
+        el: '#app',
+        data: {
+            test: "working :)",
+            memes: []
+        }
+    });
+
+    //holds links to memes, not super useful anymore
+    let memesList = [];
+
+    //testing v-for
+    /*app.memes.push({src:"https://cdn.shopify.com/s/files/1/2336/3219/products/shutterstock_77846398eureka2_x850.jpg"});
+    app.memes.push({src:"https://cdn.shopify.com/s/files/1/2336/3219/products/shutterstock_77846398eureka2_x850.jpg"});
+    app.memes.push({src:"https://cdn.shopify.com/s/files/1/2336/3219/products/shutterstock_77846398eureka2_x850.jpg"});
+    app.memes.push({src:"https://cdn.shopify.com/s/files/1/2336/3219/products/shutterstock_77846398eureka2_x850.jpg"});
+    */
+
+    collectMemes();
+
+    //fetches the json file containing all the locations of the memes. A server must be running for this to function.
+    function collectMemes(){
+        fetch('./memes.json',{method:"GET"}).then(data=>{
+            data.json().then(final=>{
+                console.log(final);
+                for(let i = 0; i < final.memes.length; i++){
+                    app.memes.push(final.memes[i]);
+                }
+            });
+        });
+    }
+</script>
+</html>
