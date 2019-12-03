@@ -15,6 +15,9 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div id="canvas-div">
+        <canvas></canvas>
+    </div>
     <div class="mdl-grid" id="app">
         <div class="mdl-grid mdl-cell mdl-cell--12-col mdl-cell--middle">
             <div class="mdl-cell mdl-cell--12-col mdl-cell--middle">
@@ -24,13 +27,20 @@
                 <p class="center-text">Here lies all the dank memes that were submitted as assignments during this semester. May the lemons be with you.</p>
             </div>
         </div>
-        <div class="mdl-grid mdl-cell mdl-cell--12-col">
+        <div class="mdl-grid mdl-cell mdl-cell--12-col" id="simple-memes">
             <div class="mdl-cell mdl-cell--3-col" v-for="meme in memes">
                 <img :src="meme.src"/>
             </div>
         </div>
     </div>
+    <div id="mode">
+        <select>
+            <option value="simple">Simple</option>
+            <option value="meme">Meme</option>
+        </select>
+    </div>
 </body>
+<script src="./lib/victor.js"></script>
 <script>
     //create the vue instance
     var app = new Vue({
@@ -40,6 +50,34 @@
             memes: []
         }
     });
+
+    let modeSelect = document.querySelector('#mode').querySelector('select');
+    let canvas = document.querySelector('canvas');
+    let ctx = canvas.getContext('2d');
+
+    let canvasData = {
+        images: [],
+        mousePos: [],
+        mousePosIndex: 0
+    };
+
+    modeSelect.onchange = () => {
+        if(modeSelect.value == 'meme'){
+            document.body.style.fontFamily = "'Gochi Hand', cursive";
+            document.querySelector('h1').style.fontFamily = "'Gochi Hand', cursive";
+            document.querySelector('#simple-memes').style.display = 'none';
+            document.querySelector("#canvas-div").style.display = 'inline';
+            document.querySelector("#app").style.color = 'white';
+            initCanvas();
+        }
+        else{
+            document.body.style.fontFamily = '"Helvetica","Arial",sans-serif';
+            document.querySelector('h1').style.fontFamily = '"Roboto","Helvetica","Arial",sans-serif';
+            document.querySelector('#simple-memes').style.display = 'flex';
+            document.querySelector("#canvas-div").style.display = 'none';
+            document.querySelector("#app").style.color = 'black';
+        }
+    }
 
     //holds links to memes, not super useful anymore
     let memesList = [];
@@ -63,6 +101,140 @@
                 }
             });
         });
+    }
+
+    function initCanvas(){
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        let stuff = document.querySelectorAll('img');
+        canvasData.images = [];
+        console.log(app.memes);
+        let total = 10;
+        for(let i = 0; i < stuff.length; i++){
+            //let img = new Image(100,100);
+            //img.src = app.memes[i];
+            canvasData.images.push(new Meme(stuff[i].src));
+            canvasData.images[i].applyForce(new Victor(Math.random() * 10 - Math.random() * 20, Math.random() * 10 - Math.random() * 20));
+        }
+        for(let i = 0; i < canvasData.images.length; i++){
+            if(Math.random() > .1){
+                continue;
+            }
+            canvasData.images[i].canDraw = true;
+            total--;
+            if(total == 0) break;
+        }
+
+        for(let i = 0; i < 10; i++)
+            canvasData.mousePos.push(new Victor(0,0));
+
+        canvasLoop();
+    }
+
+    onmousemove = e => {
+        if(canvasData.mousePosIndex == 10){
+            mousePosIndex = 0;
+        }
+        canvasData.mousePos[canvasData.mousePosIndex] = new Victor(e.clientX,e.clientY);
+        canvasData.mousePosIndex++;
+    }
+
+    function canvasLoop(){
+        requestAnimationFrame(canvasLoop);
+
+        /*let avgMouseSpd = 0;
+        for(let i = 1; i < canvasData.mousePos.length; i++){
+            avgMouseSpd += canvasData.mousePos[i].clone().length - canvasData.mousePos[i-1].clone().length;
+        }
+        avgMouseSpd /= 10;
+        console.log(avgMouseSpd);*/
+        
+
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        for(let i = 0; i < canvasData.images.length; i++){
+            canvasData.images[i].update();
+        }
+
+        //ctx.filter = `invert(${100 - 100 / avgMouseSpd.length})`;
+       // ctx.fillStyle = `rgba(255,0,0,${1 - 1/avgMouseSpd}`;
+        ctx.save();
+        //ctx.globalAlpha = 1/avgMouseSpd;
+        ctx.fillStyle = 'red';
+        //ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.restore();
+    }
+
+    class Meme{
+        constructor(src){
+            this.src = src;
+            this.img = new Image();
+            this.img.src = src;
+            this.img.onload = () =>{
+                this.doneloading = true;
+            }
+            this.pos = new Victor(Math.random() * canvas.width, Math.random() * canvas.height);
+            this.vel = new Victor(0,0);
+            this.acc = new Victor(0,0);
+            this.size = new Victor(.25,.25);
+            this.alpha = Math.random();
+            this.canDraw = false;
+            this.doneloading = false;
+            this.reverse = false;
+        }
+
+        draw(){
+            ctx.save();
+            ctx.globalAlpha = this.alpha;
+            ctx.drawImage(this.img,this.pos.x,this.pos.y,this.size.x * this.img.width,this.size.y * this.img.height);
+            ctx.restore();
+        }
+
+        applyForce(f){
+            this.acc.add(f.clone());
+        }
+
+        setNextImage(){
+            while(true){
+                let rnum = Math.random() * canvasData.images.length;
+                rnum = Math.trunc(rnum);
+                if(!canvasData.images[rnum].canDraw){
+                    canvasData.images[rnum].canDraw = true;
+                    canvasData.images[rnum].pos = new Victor(Math.random() * canvas.width, Math.random() * canvas.height);
+                    canvasData.images[rnum].applyForce(new Victor(Math.random() * 10 - Math.random() * 20, Math.random() * 10 - Math.random() * 20));
+                    canvasData.images[rnum].size = new Victor(Math.random() * 2, Math.random() * 2);
+                    break;
+                    
+                }
+            }
+        }
+
+        update(){
+            if(!this.canDraw || !this.doneloading){
+                return;
+            }
+            this.draw();
+            this.vel.add(this.acc.clone());
+            this.pos.add(this.vel.clone());
+            if(!this.reverse){
+                this.alpha += 0.01;
+            }
+            else{
+                this.alpha -= 0.01;
+            }
+            if(this.alpha > 1){
+                this.reverse = true;
+                this.alpha = 1;
+            }
+            else if (this.alpha < 0){
+                this.reverse = false;
+                this.alpha = 0;
+                this.canDraw = false;
+                this.setNextImage();
+            }
+            this.acc = new Victor(0,0);
+        }
     }
 </script>
 </html>

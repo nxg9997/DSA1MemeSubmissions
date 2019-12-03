@@ -1,7 +1,24 @@
+@import url('https://fonts.googleapis.com/css?family=Gloria+Hallelujah|Gochi+Hand|Indie+Flower|Patrick+Hand|Permanent+Marker|Shadows+Into+Light&display=swap');
+
+
 .center-text{
     text-align: center;
 }
 
 img{
     width: 100%;
+}
+
+#mode{
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+#canvas-div{
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -10;
 }
