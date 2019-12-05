@@ -58,7 +58,10 @@
     let canvasData = {
         images: [],
         mousePos: [],
-        mousePosIndex: 0
+        mousePosIndex: 0,
+        origin: new Victor(0,0),
+        lemon: new Image(),
+        lemonAlpha: 0
     };
 
     modeSelect.onchange = () => {
@@ -128,7 +131,10 @@
         for(let i = 0; i < 10; i++)
             canvasData.mousePos.push(new Victor(0,0));
 
-        canvasLoop();
+        canvasData.lemon.src = "./lemon.png";
+        canvasData.lemon.onload = () =>{
+            canvasLoop();
+        }
     }
 
     onmousemove = e => {
@@ -137,6 +143,46 @@
         }
         canvasData.mousePos[canvasData.mousePosIndex] = new Victor(e.clientX,e.clientY);
         canvasData.mousePosIndex++;
+    }
+
+    function deepFry(){
+        ctx.restore();
+        let cArr = ctx.getImageData(0,0,canvas.width,canvas.height);
+        for(let i = 0; i < cArr.data.length; i+=4){
+            /*let avg = [0,0,0];
+            for(let j = i; j < i * 10; j+=4){
+                avg[0] += cArr.data[j];
+                avg[1] += cArr.data[j+1];
+                avg[2] += cArr.data[j+2];
+                
+            }
+            avg[0] /= 10;
+            avg[1] /= 10;
+            avg[2] /= 10;
+            for(let j = i; j < i * 10; j+=4){
+                cArr.data[j] = avg[0];
+                cArr.data[j+1] = avg[1];
+                cArr.data[j+1] = avg[2];
+                //add more red
+                cArr.data[j] += 100;
+            }*/
+            
+            //add more red
+            cArr.data[i] += 100;
+
+            // v color shift v
+            /*let r = Math.trunc(Math.random() * 255);
+            let b = Math.trunc(Math.random() * 255);
+            let g = Math.trunc(Math.random() * 255);
+            cArr.data[i] += r;
+            cArr.data[i+1] += g;
+            cArr.data[i+2] += b;*/
+        }
+        ctx.putImageData(cArr,0,0);
+        ctx.save();
+        canvasData.origin.x += 10 - Math.random() * 20;
+        canvasData.origin.y += 10 - Math.random() * 20;
+        ctx.translate(canvasData.origin.x,canvasData.origin.y);
     }
 
     function canvasLoop(){
@@ -150,9 +196,15 @@
         console.log(avgMouseSpd);*/
         
 
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        ctx.fillStyle = 'black';
+        //ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = 'rgba(0,0,0,.1)';
         ctx.fillRect(0,0,canvas.width,canvas.height);
+
+        ctx.save();
+        ctx.globalAlpha = canvasData.lemonAlpha;
+        ctx.drawImage(canvasData.lemon,0,0,canvas.width,canvas.height);
+        canvasData.lemonAlpha += .001;
+        ctx.restore();
         for(let i = 0; i < canvasData.images.length; i++){
             canvasData.images[i].update();
         }
@@ -164,6 +216,7 @@
         ctx.fillStyle = 'red';
         //ctx.fillRect(0,0,canvas.width,canvas.height);
         ctx.restore();
+        deepFry();
     }
 
     class Meme{
