@@ -39,6 +39,8 @@
             <option value="meme">Meme</option>
         </select>
     </div>
+    <div style="display: none" id="riddle">
+    </div>
 </body>
 <script src="./lib/victor.js"></script>
 <script>
@@ -133,6 +135,8 @@
 
         canvasData.lemon.src = "./lemon.png";
         canvasData.lemon.onload = () =>{
+        
+            document.querySelector('#riddle').innerHTML = '<iframe width="956" height="538" src="https://www.youtube.com/embed/kP45oOLCmHw?autoplay=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
             canvasLoop();
         }
     }
