@@ -259,6 +259,8 @@
                 if(!canvasData.images[rnum].canDraw){
                     canvasData.images[rnum].canDraw = true;
                     canvasData.images[rnum].pos = new Victor(Math.random() * canvas.width, Math.random() * canvas.height);
+                    canvasData.images[rnum].acc = new Victor(0,0);
+                    canvasData.images[rnum].vel = new Victor(0,0);
                     canvasData.images[rnum].applyForce(new Victor(Math.random() * 10 - Math.random() * 20, Math.random() * 10 - Math.random() * 20));
                     canvasData.images[rnum].size = new Victor(Math.random() * 2, Math.random() * 2);
                     break;
